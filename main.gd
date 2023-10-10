@@ -14,7 +14,7 @@ func _ready():
 	screensize = get_viewport().get_visible_rect().size
 	$Player.screensize = screensize
 	$Player.hide()
-	new_game()
+	
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -33,13 +33,38 @@ func spawn_coins():
 
 func new_game():
 	playing = true
-	level = 1
+	level = 10
 	score = 0
 	time_left = playtime
 	$Player.start()
 	$Player.show()
 	$GameTimer.start()
 	spawn_coins()
+	$UI.update_score(score)
+	$UI.update_timer(time_left)
 
-
+func _on_game_timer_timeout():
+	time_left -= 1
+	$UI.update_timer(time_left)
+	if time_left <= 0:
+		game_over()
 		
+func _on_player_hurt():
+	game_over()
+	
+func _on_player_pickup():
+	score += 1
+	$UI.update_score(score)
+	
+func game_over():
+	playing = false
+	$GameTimer.stop()
+	get_tree().call_group("coins", "queue_free")
+	$UI.show_game_over()
+	$Player.die()
+	
+func _on_ui_start_game():
+	new_game()
+	
+func _on_game_timer_timeout():
+	pass
