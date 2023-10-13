@@ -32,8 +32,10 @@ func _process(_delta):
 	if playing and get_tree().get_nodes_in_group(\"coins\").size() == 0:
 		level += 1
 		time_left += 5
-		$Player.speed += 400
+		$Player.speed += 25
 		spawn_coins()
+	if level > 6 and level < 10:
+		time_left += 10
 
 func spawn_coins():
 	for i in level + 4:
