@@ -6,17 +6,17 @@
 [sub_resource type="LabelSettings" id="LabelSettings_7tuq3"]
 line_spacing = 12.0
 font = ExtResource("1_jpmpn")
-font_size = 20
+font_size = 43
 shadow_size = 4
 
 [node name="UI" type="CanvasLayer"]
 script = ExtResource("1_20nr1")
 
 [node name="Message" type="Label" parent="."]
-offset_left = 26.0
-offset_top = 332.0
-offset_right = 422.0
-offset_bottom = 452.0
+offset_left = 3.0
+offset_top = 239.0
+offset_right = 477.0
+offset_bottom = 466.0
 text = "Coin Dash!"
 label_settings = SubResource("LabelSettings_7tuq3")
 horizontal_alignment = 1
@@ -54,10 +54,10 @@ wait_time = 2.0
 one_shot = true
 
 [node name="StartButton" type="Button" parent="."]
-offset_left = 177.0
-offset_top = 503.0
-offset_right = 298.0
-offset_bottom = 537.0
+offset_left = 140.0
+offset_top = 461.0
+offset_right = 330.0
+offset_bottom = 552.0
 text = "Start"
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
