@@ -1,17 +1,20 @@
-[gd_scene load_steps=9 format=3 uid="uid://0ljpsh3aitfv"]
+[gd_scene load_steps=11 format=3 uid="uid://0ljpsh3aitfv"]
 
 [ext_resource type="PackedScene" uid="uid://tyw28n06gt28" path="res://coin.tscn" id="2_3baia"]
+[ext_resource type="PackedScene" uid="uid://clda0aoni2dsl" path="res://powerup.tscn" id="2_ggtkc"]
 [ext_resource type="Texture2D" uid="uid://ibjfgd3t0qqy" path="res://assets/grass.png" id="2_sxabl"]
 [ext_resource type="PackedScene" uid="uid://bvdaiqnjvhf2y" path="res://player.tscn" id="4_rmtv5"]
 [ext_resource type="PackedScene" uid="uid://bimye1uwtgi8k" path="res://ui.tscn" id="5_c0syq"]
 [ext_resource type="AudioStream" uid="uid://0ccpbjh2hmk2" path="res://assets/audio/EndSound.wav" id="5_ms4xi"]
 [ext_resource type="AudioStream" uid="uid://ogjf7swbr1hj" path="res://assets/audio/Level.wav" id="6_r32bl"]
 [ext_resource type="AudioStream" uid="uid://buj047ch4862s" path="res://assets/audio/Coin.wav" id="7_e7rsp"]
+[ext_resource type="AudioStream" uid="uid://ba6cjf0u8m6s2" path="res://assets/audio/Powerup.wav" id="8_6rrxe"]
 
 [sub_resource type="GDScript" id="GDScript_he3s3"]
 script/source = "extends Node
 
 @export var coin_scene : PackedScene
+@export var powerup_scene : PackedScene
 @export var playtime = 30
 
 var level = 1
@@ -32,10 +35,10 @@ func _process(_delta):
 	if playing and get_tree().get_nodes_in_group(\"coins\").size() == 0:
 		level += 1
 		time_left += 5
-		$Player.speed += 25
 		spawn_coins()
-	if level > 6 and level < 10:
-		time_left += 10
+		$PowerupTimer.wait_time = randf_range(5, 10)
+		$PowerupTimer.start()
+	
 
 func spawn_coins():
 	for i in level + 4:
@@ -67,10 +70,16 @@ func _on_game_timer_timeout():
 func _on_player_hurt():
 	game_over()
 	
-func _on_player_pickup():
-	score += 1
-	$UI.update_score(score)
-	$CoinSound.play()
+func _on_player_pickup(type):
+	match type:
+		\"coin\":
+			score += 1
+			$UI.update_score(score)
+			$CoinSound.play()
+		\"powerup\":
+			$PowerupSound.play()
+			time_left += 5
+			$UI.update_timer(time_left)
 	
 func game_over():
 	playing = false
@@ -83,11 +92,18 @@ func game_over():
 func _on_ui_start_game():
 	new_game()
 
+func _on_powerup_timer_timeout():
+	var p = powerup_scene.instantiate()
+	add_child(p)
+	p.screensize = screensize
+	p.position = Vector2(randi_range(0, screensize.x),
+		randi_range(0, screensize.y))
 "
 
 [node name="Main" type="Node"]
 script = SubResource("GDScript_he3s3")
 coin_scene = ExtResource("2_3baia")
+powerup_scene = ExtResource("2_ggtkc")
 
 [node name="Background" type="TextureRect" parent="."]
 anchors_preset = 15
@@ -116,7 +132,14 @@ stream = ExtResource("6_r32bl")
 position = Vector2(86, 62)
 stream = ExtResource("7_e7rsp")
 
+[node name="PowerupTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="PowerupSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_6rrxe")
+
 [connection signal="hurt" from="Player" to="." method="_on_player_hurt"]
 [connection signal="pickup" from="Player" to="." method="_on_player_pickup"]
 [connection signal="timeout" from="GameTimer" to="." method="_on_game_timer_timeout"]
 [connection signal="start_game" from="UI" to="." method="_on_ui_start_game"]
+[connection signal="timeout" from="PowerupTimer" to="." method="_on_powerup_timer_timeout"]

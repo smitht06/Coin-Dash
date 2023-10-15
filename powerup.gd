@@ -9,6 +9,5 @@ func pickup():
 	await tw.finished
 	queue_free()
 
-
 func _on_lifetime_timeout():
 	queue_free() # Replace with function body.
